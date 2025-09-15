@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NCD CDSS Prototype</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>NCD Clinical Decision Support System (CDSS) Prototype</h1>
+    <section>
+        <h2>Upload Guideline PDF</h2>
+        <form action="/upload-guideline" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".pdf" required>
+            <button type="submit">Upload</button>
+        </form>
+        <p>Uploaded PDFs: {{ uploaded }}</p>
+    </section>
+    <section>
+        <h2>Analyze a Patient Case</h2>
+        <form id="caseForm">
+            <input type="text" name="patient_age" placeholder="Age"><br>
+            <input type="text" name="patient_gender" placeholder="Gender"><br>
+            <input type="text" name="chief_complaint" placeholder="Chief complaint" required><br>
+            <textarea name="history" placeholder="History"></textarea><br>
+            <textarea name="vitals" placeholder="Vitals"></textarea><br>
+            <textarea name="investigations" placeholder="Investigations"></textarea><br>
+            <textarea name="comorbidities" placeholder="Comorbidities"></textarea><br>
+            <button type="submit">Analyze</button>
+        </form>
+        <pre id="result"></pre>
+    </section>
+    <section>
+        <h2>Knowledge Files</h2>
+        <ul>
+        {% for k in knowledge %}
+            <li>{{ k }}</li>
+        {% endfor %}
+        </ul>
+    </section>
+    <footer>
+        <a href="https://github.com/YOUR_USERNAME/YOUR_REPO">GitHub Repo</a>
+    </footer>
+    <script>
+    document.getElementById('caseForm').onsubmit = async function(e) {
+        e.preventDefault();
+        let data = {};
+        Array.from(e.target.elements).forEach(el => {
+            if (el.name) data[el.name] = el.value;
+        });
+        let resp = await fetch('/analyze-case', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        let out = await resp.json();
+        document.getElementById('result').innerText = JSON.stringify(out, null, 2);
+    }
+    </script>
+</body>
+</html>
